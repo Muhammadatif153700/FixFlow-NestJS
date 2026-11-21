@@ -1,0 +1,1 @@
+export const FIXFLOW_STORE = Symbol('FIXFLOW_STORE');
