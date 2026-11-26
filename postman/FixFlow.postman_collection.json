@@ -1,0 +1,216 @@
+{
+	"info": {
+		"name": "FixFlow API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api"
+		},
+		{
+			"key": "reqToken",
+			"value": ""
+		},
+		{
+			"key": "dispToken",
+			"value": ""
+		},
+		{
+			"key": "techToken",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "1. Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"New Student\",\n  \"email\": \"new@test.com\",\n  \"password\": \"Pass1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/auth/register"
+					}
+				},
+				{
+					"name": "Login (Requester)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"reqToken\", jsonData.data.access_token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"req1@test.com\",\n  \"password\": \"Pass1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/auth/login"
+					}
+				},
+				{
+					"name": "Login (Dispatcher)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"dispToken\", jsonData.data.access_token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"dispatch@test.com\",\n  \"password\": \"Pass1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/auth/login"
+					}
+				},
+				{
+					"name": "Login (Technician)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"techToken\", jsonData.data.access_token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"tech1@test.com\",\n  \"password\": \"Pass1234\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/auth/login"
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Requests Workflow",
+			"item": [
+				{
+					"name": "Create Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{reqToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Broken Projector\",\n  \"description\": \"The projector in room 101 is not turning on.\",\n  \"categoryId\": 3,\n  \"building\": \"Main Block\",\n  \"room\": \"101\",\n  \"priority\": \"HIGH\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/requests"
+					}
+				},
+				{
+					"name": "Assign Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{dispToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"technicianId\": 4\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/requests/1/assign"
+					}
+				},
+				{
+					"name": "Start Work",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{techToken}}" }
+						],
+						"url": "{{baseUrl}}/requests/1/start"
+					}
+				},
+				{
+					"name": "Resolve Work",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{techToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resolutionNote\": \"Replaced the power cable and it works perfectly now.\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/requests/1/resolve"
+					}
+				},
+				{
+					"name": "Close Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{reqToken}}" }
+						],
+						"url": "{{baseUrl}}/requests/1/close"
+					}
+				},
+				{
+					"name": "Submit Feedback",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{reqToken}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rating\": 5,\n  \"comment\": \"Excellent and fast service!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": "{{baseUrl}}/requests/1/feedback"
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard (Dispatcher)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{dispToken}}" }
+						],
+						"url": "{{baseUrl}}/dashboard"
+					}
+				}
+			]
+		}
+	]
+}
